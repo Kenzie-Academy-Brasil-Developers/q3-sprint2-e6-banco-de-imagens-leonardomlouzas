@@ -1,7 +1,10 @@
-from flask import jsonify
+import json
+from flask import jsonify, send_from_directory
 import os
 
 ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
+FILES_DIRECTORY = os.getenv("FILES_DIRECTORY")
+ABS_PATH = os.path.abspath(FILES_DIRECTORY)
 
 def all_images():
     result = []
@@ -41,4 +44,37 @@ def selected_images(type):
     return {"msg":f"No '{type}' files"}, 404
 
 
-#TODO: CREATE UPLOAD/DOWNLOAD FUNCTIONS
+
+def download_image(image):
+    *name, extension = image.split(".")
+
+    if extension in ALLOWED_EXTENSIONS:
+        
+        path, dire, files = next(os.walk(f'{FILES_DIRECTORY}/{extension}'))
+        
+        if image in files:
+            return send_from_directory(
+                directory=f'../images/{extension}',
+                path= image,
+                as_attachment=True
+            )
+
+    return {"msg": f"No '{'.'.join(name)}' in '{extension}' folder"}, 404
+
+
+def upload_image(image):
+    file = image
+    *name, extension = image.filename.split(".")
+
+    if extension in ALLOWED_EXTENSIONS:
+
+        *_, files = next(os.walk(f'{ABS_PATH}/{extension}'))
+
+        if not file.filename in files:
+            file.save(os.path.join(f'{ABS_PATH}/{extension}', file.filename))
+
+            return {"Msg": f"success uploading '{'.'.join(name)}' in '{extension}' folder."}
+        else:
+            return {"Msg": f"file '{'.'.join(name)}' already exist in '{extension}' folder."}
+
+    return {"Msg": f"Extension '{extension}' not allowed."}

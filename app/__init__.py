@@ -1,9 +1,9 @@
 from flask import Flask, request
 import os
-from .kenzie.image import all_images, selected_images
+from .kenzie.image import all_images, selected_images, download_image, upload_image
 
 app = Flask(__name__)
-
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024 
 
 def initial_config():
 
@@ -45,12 +45,12 @@ def files2(extension):
 
 @app.post("/upload")
 def upload():
-    data = request.get_json()
-    return (f"upload: {data}")
+    file = request.files["file"]
+    return upload_image(file)
 
 @app.get("/download/<file_name>")
 def download1(file_name):
-    return(f"download1: {file_name}")
+    return(download_image(file_name))
 
 @app.get("/download-zip")
 def download2():
