@@ -31,16 +31,12 @@ def initial_config():
 
 initial_config()
 
-@app.get("/")
-def home():
-    return "home"
-
 @app.get("/files")
 def files():
     return all_images()
 
 @app.get("/files/<extension>")
-def files2(extension):
+def files_extension(extension):
     return selected_images(extension)
 
 @app.post("/upload")
@@ -49,11 +45,11 @@ def upload():
     return upload_image(file)
 
 @app.get("/download/<file_name>")
-def download1(file_name):
+def download_file(file_name):
     return(download_image(file_name))
 
 @app.get("/download-zip")
-def download2():
+def download_zip_files():
     file_extension = request.args.get("file_extension")
     compression_ratio = request.args.get("compression_ratio")
 

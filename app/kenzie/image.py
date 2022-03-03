@@ -27,7 +27,7 @@ def all_images():
     if len(result) > 0:
         return jsonify(result), 200
     
-    return {"msg":"No files"}, 404
+    return {"Msg":"No files"}, 404
 
 def selected_images(type):
     if type in ALLOWED_EXTENSIONS:
@@ -43,9 +43,10 @@ def selected_images(type):
         if len(result) > 0:
 
             return jsonify(result), 200
-            
+        else:
+            return {"Msg": f"The folder '{type}' is empty."}
     
-    return {"msg":f"No '{type}' files"}, 404
+    return {"Msg":f"There is no '{type}' folder."}, 404
 
 
 
@@ -62,8 +63,11 @@ def download_image(image):
                 path= image,
                 as_attachment=True
             )
+    else:
+        return {"Msg":f"There is no '{extension}' folder."}, 404
 
-    return {"msg": f"No '{'.'.join(name)}' in '{extension}' folder"}, 404
+
+    return {"Msg": f"There is no '{'.'.join(name)}' in '{extension}' folder"}, 404
 
 
 def upload_image(image):
@@ -77,9 +81,9 @@ def upload_image(image):
         if not file.filename in files:
             file.save(os.path.join(f'{ABS_PATH}/{extension}', file.filename))
 
-            return {"Msg": f"success uploading '{'.'.join(name)}' in '{extension}' folder."}, 201
+            return {"Msg": f"Success uploading '{'.'.join(name)}' in '{extension}' folder."}, 201
         else:
-            return {"Msg": f"file '{'.'.join(name)}' already exist in '{extension}' folder."}, 409
+            return {"Msg": f"File '{'.'.join(name)}' already exist in '{extension}' folder."}, 409
 
     return {"Msg": f"Extension '{extension}' not supported."}, 415
 
@@ -88,10 +92,10 @@ def download_zip(extension, compression = 6):
     compression = -6 if not compression else compression
 
     if not extension:
-        return {"Msg:": "Extension type must be declared."}
+        return {"Msg": "Extension type must be declared."}
 
     if not extension in ALLOWED_EXTENSIONS:
-        return {"Msg:": f"Extension '{extension}' not supported."}
+        return {"Msg": f"Extension '{extension}' not supported."}
 
     path, directory, files = next(os.walk(f'{FILES_DIRECTORY}/{extension}'))
     
