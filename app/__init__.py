@@ -1,6 +1,6 @@
 from flask import Flask, request
 import os
-from .kenzie.image import all_images, selected_images, download_image, upload_image
+from .kenzie.image import all_images, selected_images, download_image, upload_image, download_zip
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024 
@@ -57,4 +57,4 @@ def download2():
     file_extension = request.args.get("file_extension")
     compression_ratio = request.args.get("compression_ratio")
 
-    return(f"file_extension: {file_extension}. compression_ratio: {compression_ratio}")
+    return download_zip(file_extension, compression_ratio)

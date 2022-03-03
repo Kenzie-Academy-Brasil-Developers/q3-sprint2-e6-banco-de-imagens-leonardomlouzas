@@ -1,10 +1,13 @@
-import json
 from flask import jsonify, send_from_directory
 import os
+import shutil
+from zipfile import ZipFile
+
 
 ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
 FILES_DIRECTORY = os.getenv("FILES_DIRECTORY")
 ABS_PATH = os.path.abspath(FILES_DIRECTORY)
+TMP_PATH = os.path.abspath("/tmp")
 
 def all_images():
     result = []
@@ -40,6 +43,7 @@ def selected_images(type):
         if len(result) > 0:
 
             return jsonify(result), 200
+            
     
     return {"msg":f"No '{type}' files"}, 404
 
@@ -73,8 +77,42 @@ def upload_image(image):
         if not file.filename in files:
             file.save(os.path.join(f'{ABS_PATH}/{extension}', file.filename))
 
-            return {"Msg": f"success uploading '{'.'.join(name)}' in '{extension}' folder."}
+            return {"Msg": f"success uploading '{'.'.join(name)}' in '{extension}' folder."}, 201
         else:
-            return {"Msg": f"file '{'.'.join(name)}' already exist in '{extension}' folder."}
+            return {"Msg": f"file '{'.'.join(name)}' already exist in '{extension}' folder."}, 409
 
-    return {"Msg": f"Extension '{extension}' not allowed."}
+    return {"Msg": f"Extension '{extension}' not supported."}, 415
+
+def download_zip(extension, compression = 6):
+
+    compression = -6 if not compression else compression
+
+    if not extension:
+        return {"Msg:": "Extension type must be declared."}
+
+    if not extension in ALLOWED_EXTENSIONS:
+        return {"Msg:": f"Extension '{extension}' not supported."}
+
+    path, directory, files = next(os.walk(f'{FILES_DIRECTORY}/{extension}'))
+    
+    final_name = f'images {extension}.zip'
+
+    with ZipFile(final_name, mode='w', compresslevel= abs(int(compression))) as zip:
+        
+        for file in files:
+            zip.write(os.path.join(path, file))
+    
+        if os.path.exists(f'/tmp/{final_name}'):
+            os.remove(f'/tmp/{final_name}')
+
+        shutil.move(f'./{final_name}', "/tmp")
+
+        completed = True
+
+    if completed:
+        return send_from_directory(
+                directory="/tmp",
+                path= final_name,
+                as_attachment=True
+            )
+    return {"Msg": "An error ocurred."}
