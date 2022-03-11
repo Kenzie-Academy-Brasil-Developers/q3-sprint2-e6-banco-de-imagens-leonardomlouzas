@@ -95,7 +95,7 @@ def download_zip(extension, compression = 6):
         return {"Msg": "Extension type must be declared."}
 
     if not extension in ALLOWED_EXTENSIONS:
-        return {"Msg": f"Extension '{extension}' not supported."}
+        return {"Msg": f"Extension '{extension}' not supported."}, 404
 
     path, directory, files = next(os.walk(f'{FILES_DIRECTORY}/{extension}'))
     
